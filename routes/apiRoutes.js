@@ -1,5 +1,4 @@
-const router = require("express").app();
-const store = require("../db/server");
+const store = require("../server");
 
 router.get("/notes", function (req, res) {
   store
@@ -21,7 +20,7 @@ fs.writeFile('/db/store', data, (err) => {
     res.json(data);
     res.json(true)
   })
-
+  
   app.delete("/notes/:id", (req, res) => {
     store
       .removeNote(req.params.id)
@@ -30,4 +29,4 @@ fs.writeFile('/db/store', data, (err) => {
   });
 })
 
-module.exports = router;  
+module.exports = router;
