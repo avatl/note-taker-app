@@ -5,9 +5,13 @@ In this app, users are able to enter a webpage where they are then able to type 
 
 ## Developed With
 HTML
+
 CSS
+
 JavaScript
+
 JSON
+
 API's
 
 ## Images 
