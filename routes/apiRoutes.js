@@ -1,25 +1,6 @@
-const store = require("../server");
+const store = require("../db/store");
 const router = require("express").Router();
-const fs = require("fs");
-const data = require("../db/db.json")
-// this code will execute when the server receives a GET request to api/notes
-router.get("/notes", function (req, res) {
-  store
-  res.json(notes);
-});
-// read what is in db.json => using fs module
-() => {
-  return store.read().then((notes) => {
-    let parsedNotes;
-    // If notes isn't an array or can't be turned into one, send back a new empty array
-    try {
-      parsedNotes = [].concat(JSON.parse(notes));
-    } catch (err) {
-      parsedNotes = [];
-    }
-    return parsedNotes;
-  });
-}
+
 // send response with data
 router.post("/notes", function (req, res) {
   store
@@ -27,11 +8,16 @@ router.post("/notes", function (req, res) {
   res.json(notes);
   if (err) throw err;
 });
+
 // take new note and add it to db.json using fs module
-router.get("/api/notes", function (req, res) {
-  res.json(data);
-  res.json(true)
+router.get("/notes", function (req, res) {
+  console.log(store.getNotes)
+  store.getNotes()
+    .then((notes) => {
+      res.json(notes);
+    })
 })
+
 // DELETE "/api/notes" deletes the note with an id equal to req.params.id
 router.delete("/notes/:id", (req, res) => {
   store
@@ -39,4 +25,5 @@ router.delete("/notes/:id", (req, res) => {
     .then(() => res.json({ ok: true }))
     .catch((err) => res.status(500).json(err));
 });
+
 module.exports = router;
