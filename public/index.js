@@ -4,10 +4,10 @@ const $saveNoteBtn = $(".save-note");
 const $newNoteBtn = $(".new-note");
 const $noteList = $(".list-container .list-group");
 
-// activeNote is used to keep track of the note in the textarea
+// activeNote (keeps track of the note in the textarea)
 let activeNote = {};
 
-// A function for getting all notes from the db
+// Recall from db
 const getNotes = () => {
   return $.ajax({
     url: "/api/notes",
@@ -15,7 +15,7 @@ const getNotes = () => {
   });
 };
 
-// A function for saving a note to the db
+// Saving from db
 const saveNote = (note) => {
   return $.ajax({
     url: "/api/notes",
@@ -24,7 +24,7 @@ const saveNote = (note) => {
   });
 };
 
-// A function for deleting a note from the db
+// Deleting from db
 const deleteNote = (id) => {
   return $.ajax({
     url: "api/notes/" + id,
@@ -32,9 +32,10 @@ const deleteNote = (id) => {
   });
 };
 
-// If there is an activeNote, display it, otherwise render empty inputs
+// Display activeNote - render empty inputs
 const renderActiveNote = () => {
   $saveNoteBtn.hide();
+
   if (activeNote.id) {
     $noteTitle.attr("readonly", true);
     $noteText.attr("readonly", true);
@@ -48,12 +49,13 @@ const renderActiveNote = () => {
   }
 };
 
-// Get the note data from the inputs, save it to the db and update the view
+// Get the note data from the inputs, save it to the db, update the view
 const handleNoteSave = function () {
   const newNote = {
     title: $noteTitle.val(),
     text: $noteText.val(),
   };
+
   saveNote(newNote).then(() => {
     getAndRenderNotes();
     renderActiveNote();
@@ -63,32 +65,34 @@ const handleNoteSave = function () {
 // Delete the clicked note
 const handleNoteDelete = function (event) {
 
-  // prevents the click listener for the list from being called when the button inside of it is clicked
+  // Prevents the click listener list from being called when the button inside of it is clicked
   event.stopPropagation();
+
   const note = $(this).parent(".list-group-item").data();
+
   if (activeNote.id === note.id) {
     activeNote = {};
   }
+
   deleteNote(note.id).then(() => {
     getAndRenderNotes();
     renderActiveNote();
   });
 };
 
-// Sets the activeNote and displays it
+// Sets & displays activeNote
 const handleNoteView = function () {
   activeNote = $(this).data();
   renderActiveNote();
 };
 
-// Sets the activeNote to and empty object and allows the user to enter a new note
+// Empties activeNote for new note
 const handleNewNoteView = function () {
   activeNote = {};
   renderActiveNote();
 };
 
-// If a note's title or text are empty, hide the save button
-// Or else show it
+// No save btn if fields are empty
 const handleRenderSaveBtn = function () {
   if (!$noteTitle.val().trim() || !$noteText.val().trim()) {
     $saveNoteBtn.hide();
@@ -97,9 +101,10 @@ const handleRenderSaveBtn = function () {
   }
 };
 
-// Render's the list of note titles
+// Render note titles
 const renderNoteList = (notes) => {
   $noteList.empty();
+
   const noteListItems = [];
 
   // Returns jquery object for li with given text and delete button
@@ -108,6 +113,7 @@ const renderNoteList = (notes) => {
     const $li = $("<li class='list-group-item'>");
     const $span = $("<span>").text(text);
     $li.append($span);
+
     if (withDeleteButton) {
       const $delBtn = $(
         "<i class='fas fa-trash-alt float-right text-danger delete-note'>"
@@ -116,20 +122,24 @@ const renderNoteList = (notes) => {
     }
     return $li;
   };
+
   if (notes.length === 0) {
     noteListItems.push(create$li("No saved Notes", false));
   }
+
   notes.forEach((note) => {
     const $li = create$li(note.title).data(note);
     noteListItems.push($li);
   });
+
   $noteList.append(noteListItems);
 };
 
-// Gets notes from the db and renders them to the sidebar
+// Gets notes from the db - renders to sidebar
 const getAndRenderNotes = () => {
   return getNotes().then(renderNoteList);
 };
+
 $saveNoteBtn.on("click", handleNoteSave);
 $noteList.on("click", ".list-group-item", handleNoteView);
 $newNoteBtn.on("click", handleNewNoteView);
