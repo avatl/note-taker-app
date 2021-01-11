@@ -1,24 +1,22 @@
-const store = require("../db/store");
 const router = require("express").Router();
+const store = require("../db/store");
 
-// send response with data
-router.post("/notes", function (req, res) {
+// Get "/api/notes" responds with all notes from the database
+router.get("/notes", (req, res) => {
   store
-    .addNote(req.body)
-  res.json(notes);
-  if (err) throw err;
+    .getNotes()
+    .then((notes) => res.json(notes))
+    .catch((err) => res.status(500).json(err));
 });
 
-// take new note and add it to db.json using fs module
-router.get("/notes", function (req, res) {
-  console.log(store.getNotes)
-  store.getNotes()
-    .then((notes) => {
-      res.json(notes);
-    })
-})
+router.post("/notes", (req, res) => {
+  store
+    .addNote(req.body)
+    .then((note) => res.json(note))
+    .catch((err) => res.status(500).json(err));
+});
 
-// DELETE "/api/notes" deletes the note with an id equal to req.params.id
+// Deletes the note with an id equal to req.params.id
 router.delete("/notes/:id", (req, res) => {
   store
     .removeNote(req.params.id)
