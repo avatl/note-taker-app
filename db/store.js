@@ -3,57 +3,64 @@ const fs = require("fs");
 
 // This package will be used to generate our unique ids. https://www.npmjs.com/package/uuid
 const uuidv1 = require("uuid/v1");
-const { errorMonitor } = require("stream");
+
 const readFileAsync = util.promisify(fs.readFile);
 const writeFileAsync = util.promisify(fs.writeFile);
+
 class Store {
     read() {
         return readFileAsync("db/db.json", "utf8");
     }
+
     write(note) {
         return writeFileAsync("db/db.json", JSON.stringify(note));
     }
-    getNotes() {
 
-        // read notes in database
-        this.read().then((notes) => {
-            let parseNotes;
+    getNotes() {
+        return this.read().then((notes) => {
+            let parsedNotes;
+
+            // If notes isn't an array or can't be turned into one, send back a new empty array
             try {
-                parseNotes = [].concat(JSON.parse(notes))
+                parsedNotes = [].concat(JSON.parse(notes));
+            } catch (err) {
+                parsedNotes = [];
             }
-            catch (error) {
-                parseNotes = []
-            }
-            return parseNotes;
-        })
+
+            return parsedNotes;
+        });
     }
 
-    // add note were given to array
     addNote(note) {
-        const { title, text } = note;
+        const {
+            title,
+            text
+        } = note;
+
         if (!title || !text) {
-            throw new Error("Enter proper text")
+            throw new Error("Note 'title' and 'text' cannot be blank");
         }
 
-        // add new note from user to notes we send back to database
-        const newNote = { title, text, id: uuidv1() };
+        // Add a unique id to the note using uuid package
+        const newNote = {
+            title,
+            text,
+            id: uuidv1()
+        };
+
+        // Get all notes, add the new note, write all the updated notes, return the newNote
         return this.getNotes()
             .then((notes) => [...notes, newNote])
-
-            // write completed array in db.json
-            .then((updatedNotes) => {
-                this.write(updatedNotes)
-            })
-
-            // returning the new note
-            .then(() => newNote)
+            .then((updatedNotes) => this.write(updatedNotes))
+            .then(() => newNote);
     }
 
-    // Remove note
-    removeNote(removeId) {
-        return this.getNotes().then((notes) => notes.filter((note) => note.id !== removeId))
-            .then((filteredNotes) => this.write(filteredNotes))
+    removeNote(id) {
+        // Get all notes, remove the note with the given id, write the filtered notes
+        return this.getNotes()
+            .then((notes) => notes.filter((note) => note.id !== id))
+            .then((filteredNotes) => this.write(filteredNotes));
     }
 }
 
-module.exports = new Store();
+module.exports = new Store(); v
